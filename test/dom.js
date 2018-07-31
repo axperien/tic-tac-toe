@@ -5,7 +5,7 @@ import jsdom from 'jsdom';
 import sinon from 'sinon';
 
 import Game from '../src/Game';
-import DomController from '../src/DomControlles';
+import DomController from '../src/DomController';
 
 const {
     JSDOM
@@ -16,7 +16,7 @@ global.window = dom.window;
 global.document = dom.window.document;
 
 const createGame = (board) => new Game(board);
-const createInstanse = (game = {}) => {
+const createInstance = (game = {}) => {
     return new DomController({
         game: game,
         root: '#root'
@@ -34,7 +34,7 @@ afterEach(() => {
 
 describe('DOM controller', () => {
     it('Creates empty table', () => {
-        const domController = createInstanse();
+        const domController = createInstance();
 
         domController.createTable();
 
@@ -42,7 +42,7 @@ describe('DOM controller', () => {
     });
 
     it('Creates table with 3 rows and 3 columns', () => {
-        const domController = createInstanse();
+        const domController = createInstance();
 
         domController.createTable(3, 3);
 
@@ -52,7 +52,7 @@ describe('DOM controller', () => {
     });
 
     it('Remembers indices of last clicked cell', () => {
-        const domController = createInstanse();
+        const domController = createInstance();
 
         domController.createTable(3, 3);
 
@@ -65,7 +65,7 @@ describe('DOM controller', () => {
         const gameMock = {
             acceptUserMove: sinon.spy()
         };
-        const domController = createInstanse(gameMock);
+        const domController = createInstance(gameMock);
 
         domController.createTable(3, 3);
 
@@ -76,12 +76,86 @@ describe('DOM controller', () => {
 
     it('Gets an alert when user makes move in taken cell', () => {
         const game = createGame();
-        const domController = createInstanse(game);
+        const domController = createInstance(game);
+
+        domController.init();
+        document.querySelector('table td').click();
+        document.querySelector('table td').click();
+
+        expect(window.alert.called).to.be.true
+    });
+
+    it('Redraws table on cell click', () => {
+        const game = createGame();
+        const domController = createInstance(game);
 
         domController.init();
         document.querySelector('table td').click()
-        document.querySelector('table td').click()
+        const text = document.querySelector('table td').textContent;
 
-        expect(window.alert.called).to.be.true
-    })
+        expect(text).to.be.equal('x');
+    });
+
+    it('Makes computer move right after users move', () => {
+        const game = createGame();
+        const domController = createInstance(game);
+
+        domController.init();
+        document.querySelector('table td').click();
+        const text = document.querySelector('table').textContent;
+
+        expect(text.indexOf('o') > -1).to.be.true;
+    });
+
+    it('Creates status text below table is someone wins', () => {
+        const game = createGame([
+            ['x', 'x', ''],
+            ['', '', ''],
+            ['', '', '']
+        ]);
+
+        const domController = createInstance(game);
+
+        domController.init();
+        document.querySelector('table tr:nth-child(1) td:nth-child(3)').click();
+
+        const status = document.querySelector('#status');
+        console.log(status)
+
+        expect(status.textContent).to.equal('user won!');
+    });
+
+    it('Creates clear button if someone wins', () => {
+        const game = createGame([
+            ['x', 'x', ''],
+            ['', '', ''],
+            ['', '', '']
+        ]);
+
+        const domController = createInstance(game);
+
+        domController.init();
+        document.querySelector('table tr:nth-child(1) td:nth-child(3)').click();
+
+        const button = document.querySelectorAll('button');
+        expect(button.length).to.equal(1);
+    });
+
+
+    it('Clears table on button click', () => {
+        const game = createGame([
+            ['x', 'x', ''],
+            ['', '', ''],
+            ['', '', '']
+        ]);
+
+        const domController = createInstance(game);
+
+        domController.init();
+        document.querySelector('table tr:nth-child(1) td:nth-child(3)').click();
+        document.querySelector('button').click();
+
+        expect(document.querySelector('table').textContent).to.equal('');
+        expect(document.querySelectorAll('button').length).to.equal(0);
+    });
 });

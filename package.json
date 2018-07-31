@@ -2,6 +2,7 @@
   "name": "tic-tac-toe",
   "version": "1.0.0",
   "description": "",
+  "main": "index.js",
   "scripts": {
     "test": "mocha --require babel-core/register",
     "build": "webpack"
@@ -34,6 +35,7 @@
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
-    "babel-runtime": "^6.26.0"
+    "babel-runtime": "^6.26.0",
+    "lodash": "^4.17.10"
   }
 }

@@ -1,16 +1,22 @@
+import cloneDeep from 'lodash/cloneDeep';
+
+import {
+    userName,
+    computerName,
+    userMoveSymbol,
+    computerMoveSymbol,
+    initialGameBoard,
+} from './const';
+
 export default class Game {
-    constructor() {
-        this._userMoveSymbol = 'x';
-        this._computerMoveSymbol = 'o';
-        this._userName = 'user';
-        this._computerName = 'computer';
+    constructor(board) {
+        this._userMoveSymbol = userMoveSymbol;
+        this._computerMoveSymbol = computerMoveSymbol;
+        this._userName = userName;
+        this._computerName = computerName;
         this._fieldSize = 3;
         this._history = [];
-        this._board = [
-            ['', '', ''],
-            ['', '', ''],
-            ['', '', '']
-        ]
+        this._board = board || cloneDeep(initialGameBoard)
     }
 
     getState() {
@@ -87,21 +93,30 @@ export default class Game {
     }
 
     isWinner(player) {
-        const symbol = this._getSymbolForPlayer(player);
-        const range = [...Array(this._fieldSize).keys()];
-        const isEqual = this._checkCellEqual(symbol);
-        
-        const horizontal = range.reduce((res, i) => 
-            isEqual(i,0) && isEqual(i,1) && isEqual(i,2) || res, false)
+        const symbol = this._getSymbolForPlayer(player)
+        const range = [...Array(this._fieldSize).keys()]
+        const isEqual = this._checkCellEqual(symbol)
 
-        return horizontal;
+        const horizontal = range.reduce((res, i) =>
+            isEqual(i, 0) && isEqual(i, 1) && isEqual(i, 2) || res, false)
+
+        const vertical = range.reduce((res, i) =>
+            isEqual(0, i) && isEqual(1, i) && isEqual(2, i) || res, false)
+
+        const diagonal = isEqual(0, 0) && isEqual(1, 1) && isEqual(2, 2) ||
+            isEqual(0, 2) && isEqual(1, 1) && isEqual(2, 0)
+
+        return horizontal ||
+            vertical ||
+            diagonal ||
+            false
     }
 
     _getSymbolForPlayer(player) {
-        return player === this._userName
-          ? this._userMoveSymbol
-          : this._computerMoveSymbol
-      }
+        return player === this._userName ?
+            this._userMoveSymbol :
+            this._computerMoveSymbol
+    }
 
     _checkCellEqual(symbol) {
         return (i, j) =>
@@ -110,5 +125,17 @@ export default class Game {
 
     getSize() {
         return this._fieldSize
-      }
+    }
+
+    clear() {
+        this._history = []
+        this._board = cloneDeep(initialGameBoard)
+    }
+
+    checkGame() {
+        if (this.isWinner(this._userName)) return `${this._userName} won!`;
+        if (this.isWinner(this._computerName)) return `${this._computerName} won!`;
+        if (this._getFreeCellsCount() === 0) return `nobody won :–(`;
+        return 'continue';
+    }
 }

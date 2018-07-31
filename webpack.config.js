@@ -1,5 +1,5 @@
-const webpack = require('webpack')
-const path = require('path')
+var webpack = require('webpack')
+var path = require('path')
 
 module.exports = [{
   name: 'client',
